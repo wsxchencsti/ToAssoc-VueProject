@@ -5,13 +5,13 @@
         <div class="spark-confirm-header">
           <h3>启用 SparkClustering</h3>
           <button class="close-btn" @click="handleCancel">
-            <img src="/icons/close.svg" alt="close">
+            <img src="/icons/common/close.svg" alt="close">
           </button>
         </div>
 
         <div class="spark-confirm-content">
           <div class="spark-icon">
-            <img src="/icons/flower_active.svg" alt="spark">
+            <img src="/icons/subheader/flower_active.svg" alt="spark">
           </div>
 
           <div class="spark-description">

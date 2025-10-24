@@ -4,7 +4,9 @@
     <h1>我是标题我是标题我是标题</h1>
     <SearchBox v-if="showSearch" :loading="loading" @search="$emit('search', $event)" />
     <nav class="nav-buttons">
-      <button @click="$emit('navigate', 'home')">View on Github</button>
+      <a href="https://github.com/wsxchencsti/ToAssoc-VueProject" target="_blank" rel="noopener noreferrer" class="link-btn">
+        View on Github
+      </a>
       <button @click="$emit('navigate', 'about')">Display</button>
     </nav>
   </header>
@@ -31,7 +33,8 @@ defineEmits(['search']);
   color: #296a5f;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 让左右分布 */
+  justify-content: space-between;
+  /* 让左右分布 */
   padding: 0px;
   z-index: 2000;
   border-top: 2px solid #2a8878;
@@ -48,7 +51,8 @@ defineEmits(['search']);
   padding-right: 60px;
 }
 
-.nav-buttons button {
+.nav-buttons button,
+.nav-buttons a {
   background-color: #fff;
   color: #2a8878;
   border: none;
@@ -57,12 +61,15 @@ defineEmits(['search']);
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.2s;
+  text-decoration: none;
   outline: none;
 }
 
-.nav-buttons button:hover {
-  background-color: #ededed;
+.nav-buttons button:hover,
+.nav-buttons a:hover {
+  background-color: #f8f8f8;
 }
+
 
 h1 {
   padding-left: 10px;
@@ -70,7 +77,8 @@ h1 {
   margin: 0;
   white-space: nowrap;
 }
-.search-wrapper{
+
+.search-wrapper {
   margin-left: -10px;
 }
 </style>
