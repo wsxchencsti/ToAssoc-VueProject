@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.env
+venv/
+env/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+vueapp/node_modules/
+vueapp/dist/
