@@ -1,13 +1,13 @@
 <template>
   <aside class="RightSidebar">
-    <!-- 弹出式 Filter 窗口 -->
+    <!-- Filter 窗口 -->
     <FilterPopup :total-papers="totalPapers" :filter-collapsed="filterCollapsed" :available-years="availableYears"
       :category-stats="categoryStats" :all-categories="allCategories" :category-filter="categoryFilter"
       @paper-count-change="$emit('paper-count-change', $event)" @year-change="$emit('year-change', $event)"
       @close="$emit('close')" @threshold-change="$emit('threshold-change', $event)"
       @category-change="$emit('category-change', $event)" />
 
-    <!-- 常驻的信息统计栏 -->
+    <!-- 信息统计栏 -->
     <div class="info-panel">
       <h3 class="menu-title">信息统计栏</h3>
       <div v-if="sparkMode" class="community-overview">
@@ -74,7 +74,7 @@ const relevanceData = computed(() => {
     .filter(item => item.value > 0);
 });
 
-// === ECharts 饼图 ===
+// === ECharts ===
 const relevancePieChart = ref(null);
 let relevancePieInstance = null;
 const categoryPieChart = ref(null);
@@ -94,34 +94,33 @@ onMounted(() => {
   }
 });
 
-// 在 RightSidebar.vue 中，修改 getCategoryColor 函数
 const getCategoryColor = (category) => {
   const palette = [
-    '#e6194b', // 鲜红
-    '#f58231', // 橙色
-    '#ffe119', // 明黄
-    '#bf00ff', // 亮紫
-    '#3b0aff', // 纯蓝
-    '#ff007f', // 艳粉
-    '#ff8c00', // 暗橙
-    '#ff4500', // 橙红
-    '#800000', // 深红
-    '#9932cc', // 深紫
-    '#ff1493', // 深粉
-    '#191970', // 午夜蓝
-    '#b22222', // 火砖红
-    '#8b008b', // 深洋红
-    '#daa520', // 金色
-    '#ff6b6b', // 珊瑚红
-    '#4ecdc4', // 蓝绿色（不是绿色系）
-    '#45b7d1', // 天蓝色
-    '#96ceb4', // 薄荷蓝绿
-    '#feca57', // 金黄色
-    '#ff9ff3', // 亮粉色
-    '#54a0ff', // 亮蓝色
-    '#5f27cd', // 深蓝紫
-    '#00d2d3', // 青蓝色
-    '#ff9f43'  // 橘黄色
+    '#e6194b', 
+    '#f58231', 
+    '#ffe119', 
+    '#bf00ff', 
+    '#3b0aff', 
+    '#ff007f', 
+    '#ff8c00', 
+    '#ff4500', 
+    '#800000', 
+    '#9932cc', 
+    '#ff1493', 
+    '#191970', 
+    '#b22222', 
+    '#8b008b', 
+    '#daa520', 
+    '#ff6b6b', 
+    '#4ecdc4', 
+    '#45b7d1', 
+    '#96ceb4', 
+    '#feca57', 
+    '#ff9ff3', 
+    '#54a0ff', 
+    '#5f27cd', 
+    '#00d2d3', 
+    '#ff9f43'  
   ];
 
   let hash = 0;
@@ -131,12 +130,10 @@ const getCategoryColor = (category) => {
   return palette[Math.abs(hash) % palette.length];
 };
 
-// 更新 setCategoryOption
-// 注入 app.vue 中的状态和方法
 const activeCategories = inject('activeCategories');
 const toggleCategory = inject('toggleCategory');
 
-// 修改 setCategoryOption 函数
+
 const setCategoryOption = () => {
   if (!categoryPieInstance) return;
 
@@ -168,7 +165,7 @@ const setCategoryOption = () => {
         data: props.categoryStats.map(item => ({
           ...item,
           itemStyle: {
-            // 如果类别被激活，添加边框高亮
+            // 激活类别添加边框高亮
             borderWidth: activeCategories.value.has(item.name) ? 3 : 1,
             borderColor: activeCategories.value.has(item.name) ? '#ff0000' : '#fff',
             shadowBlur: activeCategories.value.has(item.name) ? 20 : 10,
@@ -196,19 +193,17 @@ const setCategoryOption = () => {
     ]
   });
 
-  // 添加点击事件监听
   categoryPieInstance.off('click'); // 移除旧的事件监听器
   categoryPieInstance.on('click', (params) => {
     if (params.componentType === 'series' && params.data) {
       const categoryName = params.data.name;
       toggleCategory(categoryName);
-
-      // 更新图表高亮状态
+      // 更新高亮状态
       updateCategoryPieHighlight();
     }
   });
 };
-// 新增：更新饼图高亮状态
+
 const updateCategoryPieHighlight = () => {
   if (!categoryPieInstance) return;
 
@@ -234,12 +229,12 @@ const updateCategoryPieHighlight = () => {
     categoryPieInstance.setOption(option);
   }
 };
-// 监听 activeCategories 变化，更新饼图高亮
+
 watch(activeCategories, () => {
   updateCategoryPieHighlight();
 }, { deep: true });
 
-// 修改监听 categoryStats 变化的部分
+
 watch(
   () => props.categoryStats,
   () => {
@@ -247,7 +242,7 @@ watch(
   },
   { deep: true }
 );
-// 在组件挂载时设置饼图
+
 onMounted(() => {
   if (categoryPieChart.value) {
     categoryPieInstance = echarts.init(categoryPieChart.value);
@@ -255,7 +250,7 @@ onMounted(() => {
   }
 });
 
-// 在组件卸载时清理事件监听器
+
 import { onUnmounted } from 'vue';
 onUnmounted(() => {
   if (categoryPieInstance) {
@@ -263,7 +258,10 @@ onUnmounted(() => {
   }
 });
 
-// 设置图表 option
+
+
+
+// set option
 const setOption = () => {
   if (!relevancePieInstance) return;
   relevancePieInstance.setOption({
@@ -273,7 +271,7 @@ const setOption = () => {
     series: [
       {
         type: 'pie',
-        radius: '60%',  // 原来是 '70%'，改为环形
+        radius: '60%',  
         data: relevanceData.value,
         label: {
           show: true,
@@ -298,12 +296,11 @@ const setOption = () => {
   });
 };
 
-// 监听数据变化，更新图表
 watch(relevanceData, () => {
   setOption();
 }, { deep: true });
 
-// 监听 categoryStats 变化
+// 监听 categoryStats
 watch(
   () => props.categoryStats,
   () => {
@@ -347,12 +344,12 @@ function updateYearChart() {
     xAxis: {
       type: 'category',
       data: years,
-      axisLabel: { rotate: 45, fontSize: 10 }, // 避免重叠
+      axisLabel: { rotate: 45, fontSize: 10 }, // 避免重叠!!!!
       axisLine: { lineStyle: { color: '#ccc' } }
     },
     yAxis: {
       type: 'value',
-      minInterval: 1, // 保证最小间隔为1，不出现小数
+      minInterval: 1,
       axisLine: { show: false },
       splitLine: { lineStyle: { color: '#eee' } }
     },
@@ -368,12 +365,12 @@ function updateYearChart() {
   });
 }
 
-// === 社群力导向图 ===
+// === spark mode ===
 const communityGraph = ref(null);
 let communityGraphInstance = null;
 
 const getCommunityData = computed(() => {
-  // 计算社区数量与每个社区节点数
+
   const map = new Map();
   props.nodes.forEach(n => {
     if (!n.community_id) return;
@@ -398,26 +395,23 @@ onMounted(() => {
   }
 });
 
-// 监听 sparkMode 状态变化
+
 watch(
   () => props.sparkMode,
   async (newVal) => {
     if (newVal) {
-      // 等待 DOM 渲染完毕
       await nextTick()
 
-      // 延迟一点点再 init（防止宽高为 0）
       setTimeout(() => {
         if (communityGraph.value) {
           if (!communityGraphInstance) {
             communityGraphInstance = echarts.init(communityGraph.value)
           }
           drawCommunityGraph()
-          communityGraphInstance.resize() // 防止初次没尺寸
+          communityGraphInstance.resize() 
         }
       }, 100)
     } else {
-      // sparkMode 关闭时释放实例
       if (communityGraphInstance) {
         communityGraphInstance.dispose()
         communityGraphInstance = null
@@ -435,7 +429,6 @@ function drawCommunityGraph() {
 
   const { total, data } = getCommunityData.value;
 
-  // ✅ 中心节点
   const centerNode = {
     id: 'center',
     symbolSize: 20,
@@ -443,26 +436,25 @@ function drawCommunityGraph() {
     label: { show: true, color: '#fff', fontSize: 13, fontWeight: 'bold' }
   };
 
-  // ✅ 周边小节点（橙色 + 无文字）
   const nodes = [
     centerNode,
     ...data.map(c => ({
       id: c.id,
-      name: '', // 不显示名字
+      name: '',
       value: c.count,
-      symbolSize: Math.pow(c.count, 1.4) * 4 + 10, // 小一点
+      symbolSize: Math.pow(c.count, 1.1) * 2 + 10,
       itemStyle: { color: 'orange' },
       label: { show: false }
     }))
   ];
 
-  // ✅ 连线（直线）
+
   const links = data.map(c => ({
     source: 'center',
     target: c.id
   }));
 
-  // ✅ ECharts 配置
+
   communityGraphInstance.setOption({
     backgroundColor: 'transparent',
     animation: false,
@@ -474,17 +466,17 @@ function drawCommunityGraph() {
         data: nodes,
         links,
         force: {
-          repulsion: 100, // 更紧凑
+          repulsion: 100, 
           edgeLength: 15,
           gravity: 0.05
         },
         lineStyle: {
           color: 'rgba(42,136,120,0.4)',
           width: 1,
-          curveness: 0 // 直线
+          curveness: 0 
         },
-        emphasis: { disabled: true }, // ❌ 禁止 hover 效果
-        silent: true, // 禁止交互（更装饰化）
+        emphasis: { disabled: true },
+        silent: true, 
         draggable: false
       }
     ]
@@ -509,7 +501,7 @@ function drawCommunityGraph() {
   z-index: 1000;
 }
 
-/* 常驻信息面板 */
+
 .info-panel {
   background-color: #ffffff;
   padding: 15px;

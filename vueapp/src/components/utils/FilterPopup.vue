@@ -94,7 +94,7 @@ watch(
   }
 );
 
-// 开始拖动
+// 拖动
 const startDrag = (e) => {
   isDragging.value = true;
   dragOffset.value = {
@@ -105,7 +105,6 @@ const startDrag = (e) => {
   const onMouseMove = (moveEvent) => {
     if (!isDragging.value) return;
 
-    // 直接更新位置，不限制边界
     popupPosition.value = {
       x: moveEvent.clientX - dragOffset.value.x,
       y: moveEvent.clientY - dragOffset.value.y
@@ -122,10 +121,10 @@ const startDrag = (e) => {
   document.addEventListener('mouseup', onMouseUp);
 };
 
-// 其他状态和逻辑
+// 默认状态逻辑
 const sliderValue = ref(50);
 const linkThreshold = ref(93);
-const selectedCategories = ref([]); // ✅ 只声明一次
+const selectedCategories = ref([]); 
 
 const handleThresholdChange = (val) => {
   emit('threshold-change', val / 100);
@@ -140,7 +139,7 @@ const handleCategoryChange = () => {
   emit('category-change', [...selectedCategories.value]);
 };
 
-// === 数量滑块 ===
+//////////// 数量滑块 ////////////////
 const handleSliderChange = () => {
   emit('paper-count-change', sliderValue.value);
 };
@@ -172,7 +171,7 @@ watch(
   { immediate: true }
 );
 
-// ✅ 监听父组件的 categoryFilter 变化来同步状态
+// 监听父组件categoryFilter
 watch(
   () => props.categoryFilter,
   (newFilter) => {
@@ -181,11 +180,10 @@ watch(
   { immediate: true }
 );
 
-// === 年份滑块 ===
+//////////// 年份滑块 ////////////////
 const minYear = computed(() => props.availableYears[0]);
 const maxYear = computed(() => props.availableYears[props.availableYears.length - 1]);
-// FilterPopup.vue - 修正年份初始化
-const yearRange = ref([minYear.value, maxYear.value]); // ✅ 添加 .value
+const yearRange = ref([minYear.value, maxYear.value]);
 
 watch(
   () => props.availableYears,
@@ -205,7 +203,7 @@ const handleYearChange = (val) => {
 </script>
 
 <style scoped>
-/* 淡入淡出动画 */
+
 .filter-fade-enter-active,
 .filter-fade-leave-active {
   transition: all 0.3s ease;
@@ -250,7 +248,7 @@ const handleYearChange = (val) => {
   transform: translateY(-2px);
 }
 
-/* 顶部标题栏 */
+
 .filter-popup-header {
   display: flex;
   justify-content: space-between;
@@ -273,7 +271,7 @@ const handleYearChange = (val) => {
   border-bottom: none;
 }
 
-/* 内容区 */
+
 .filter-popup-content {
   padding: 20px 25px 25px 25px;
   max-height: 70vh;
@@ -356,7 +354,7 @@ const handleYearChange = (val) => {
   border-radius: 8px;
 }
 
-/* Element Plus 样式定制 */
+
 :deep(.el-select .el-select__tags) {
   max-height: 60px;
   overflow-y: auto;
@@ -412,7 +410,7 @@ const handleYearChange = (val) => {
   background-color: #e6f7f4;
 }
 
-/* Vue Slider 样式 */
+
 :deep(.vue-slider-dot-tooltip-inner) {
   background-color: #ffffff !important;
   border: 1px solid #2a8878 !important;
@@ -445,7 +443,6 @@ const handleYearChange = (val) => {
   content: none;
 }
 
-/* 新增：下拉菜单样式 */
 :deep(.category-dropdown-popper) {
   position: fixed !important;
   /* ✅ 固定定位 */
@@ -463,7 +460,6 @@ const handleYearChange = (val) => {
   /* ✅ 确保在最上层 */
 }
 
-/* 可选：添加滚动条样式 */
 :deep(.category-dropdown-popper .el-select-dropdown__list) {
   max-height: 280px !important;
   overflow-y: auto !important;
@@ -500,7 +496,6 @@ const handleYearChange = (val) => {
   width: 25px;
   height: 25px;
   fill: currentColor;
-  /* 继承按钮颜色 */
 }
 
 .close-btn:hover {

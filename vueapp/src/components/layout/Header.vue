@@ -1,13 +1,16 @@
 <!-- Header.vue -->
 <template>
   <header class="header">
-    <h1>我是标题我是标题我是标题</h1>
+    <h1>ToAssoc</h1>
     <SearchBox v-if="showSearch" :loading="loading" @search="$emit('search', $event)" />
     <nav class="nav-buttons">
-      <a href="https://github.com/wsxchencsti/ToAssoc-VueProject" target="_blank" rel="noopener noreferrer" class="link-btn">
+      <a href="https://github.com/wsxchencsti/ToAssoc-VueProject" target="_blank" rel="noopener noreferrer"
+        class="link-btn">
+        <!-- <img src="/icons/header/openinnew.svg" alt="open" class="open-icon" /> -->
         View on Github
       </a>
       <button @click="$emit('navigate', 'about')">Display</button>
+      <img src="/icons/header/account.svg" alt="Account" class="account-icon" title="卖掉了" />
     </nav>
   </header>
 </template>
@@ -34,7 +37,7 @@ defineEmits(['search']);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* 让左右分布 */
+  /* 左右分布 */
   padding: 0px;
   z-index: 2000;
   border-top: 2px solid #2a8878;
@@ -49,6 +52,7 @@ defineEmits(['search']);
   align-items: center;
   gap: 8px;
   padding-right: 60px;
+  padding-top: 2px;
 }
 
 .nav-buttons button,
@@ -65,14 +69,30 @@ defineEmits(['search']);
   outline: none;
 }
 
+
+
 .nav-buttons button:hover,
 .nav-buttons a:hover {
-  background-color: #f8f8f8;
+  transform: scale(1.02);
 }
 
+.account-icon {
+  margin-left: 20px;
+  width: 32px;
+  height: 32px;
+  transition: transform 0.2s ease;
+}
+
+.open-icon {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  top: 5px;
+  margin-right: 1px;
+}
 
 h1 {
-  padding-left: 10px;
+  padding-left: 20px;
   font-size: 1.5rem;
   margin: 0;
   white-space: nowrap;

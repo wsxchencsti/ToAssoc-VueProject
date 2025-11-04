@@ -5,7 +5,6 @@
       <transition name="slide-fade" mode="out-in">
         <div v-if="!collapsed" class="sidebar-content" :key="info ? 'detail' : 'list_view'">
           <template v-if="info">
-            <!-- 详细信息时返回按钮 -->
             <div class="back-section" @click="clearInfo">
               <img src="/icons/leftsidebar/format_list_bulleted.svg" alt="to-list">
               <p>Back to list</p>
@@ -63,7 +62,7 @@
             </div>
           </template>
           <template v-else>
-            <!-- 列表 -->
+            <!-- nodelist -->
             <ul class="node-list">
               <li v-for="(node, index) in nodes" :key="node.id" @click="$emit('select-node', node)"
                 @mouseenter="$emit('hover-node', node)" @mouseleave="$emit('leave-node')" class="node-item">
@@ -81,7 +80,7 @@
       </transition>
     </aside>
 
-    <!-- 外侧按钮+黑色填充 -->
+ 
     <div :class="['toggle-btn-wrapper', collapsed ? 'collapsed' : 'expanded', { visible: showBtn }]"
       @click="toggleSidebar">
       <img class="toggle-btn" :src="collapsed ? '/icons/leftsidebar/arrow_circle_right.svg' : '/icons/leftsidebar/arrow_circle_left.svg'"
@@ -112,12 +111,10 @@ const props = defineProps({
   categoryStats: { type: Array, default: () => [] }
 });
 const emit = defineEmits(["clear-info", "select-node", "clear-selection", "center-graph"]);
-// 注入父组件的方法和状态
 const getCategoryColor = inject('getCategoryColor');
 const activeCategories = inject('activeCategories');
 const toggleCategory = inject('toggleCategory');
-const categoryStats = inject('categoryStats'); // 需要在父组件中提供
-
+const categoryStats = inject('categoryStats');
 
 const collapsed = ref(false);
 const showBtn = ref(false);
@@ -137,7 +134,7 @@ const hoverSidebar = () => {
 
 const leaveSidebar = () => {
   hideTimer = setTimeout(() => {
-    showBtn.value = false; // 按钮延迟消失
+    showBtn.value = false;
   }, 300);
 };
 
@@ -166,7 +163,6 @@ const getCategoryCount = (category) => {
   z-index: 1000;
 }
 
-/* 左栏 */
 .LeftSidebar {
   margin-top: 30px;
   text-align: left;
@@ -179,13 +175,13 @@ const getCategoryCount = (category) => {
   box-sizing: border-box;
   transition: width 0.3s ease, padding 0.3s ease;
   overflow-y: auto;
-  /* 整个 sidebar 滚动 */
+
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
   line-height: 1.5;
   font-size: 16px;
-  /* border-bottom: 10px; */
+
 }
 
 .LeftSidebar.detail-mode {
@@ -212,7 +208,7 @@ const getCategoryCount = (category) => {
   padding: 5px;
 }
 
-/* paper 内容样式 */
+
 .paper-title {
   font-family: 'Times New Roman', Times, serif;
   font-size: 20px;
@@ -248,27 +244,22 @@ const getCategoryCount = (category) => {
 
 .search-in a {
   display: inline-flex;
-  /* 让内容水平/垂直居中 */
+  
   align-items: center;
   justify-content: center;
   vertical-align: middle;
   width: 35px;
-  /* 固定宽度 */
   height: 35px;
-  /* 固定高度 */
   border-radius: 4px;
-  /* 圆角 */
   transition: background 0.2s;
 }
 
 .search-in a:hover {
   background-color: #d4d4d4;
-  /* 灰底 hover 效果 */
 }
 
 .search-in img {
   width: 25px;
-  /* 图标大小 */
   height: 25px;
   object-fit: contain;
 }
@@ -278,7 +269,6 @@ const getCategoryCount = (category) => {
   color: #222;
   line-height: 1.6;
   text-align: left;
-  /* 左对齐 */
   /* hyphens: auto;               */
   word-break: normal;
   overflow-wrap: anywhere;
@@ -289,13 +279,12 @@ const getCategoryCount = (category) => {
   margin-top: 4px;
 }
 
-/* 占位提示 */
+
 .list_view {
   text-align: center;
   color: #888;
 }
 
-/* 按钮外层黑色圆形背景 + 发光 */
 .toggle-btn-wrapper {
   position: absolute;
   top: 50%;
@@ -334,7 +323,6 @@ const getCategoryCount = (category) => {
   z-index: 1100;
 }
 
-/* 内容淡入淡出 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
@@ -356,25 +344,19 @@ const getCategoryCount = (category) => {
   transition: background 0.2s;
 
   display: inline-flex;
-  /* 使内容水平排列 */
   align-items: center;
-  /* 垂直居中 */
   justify-content: center;
-  /* 水平居中 */
   gap: 6px;
-  /* 文字和图标间距 */
 }
 
 .back-section p {
   color: #296a5f;
   font-size: 14px;
   margin: 0;
-  /* 去掉默认 margin */
 }
 
 .back-section img {
   width: 20px;
-  /* 调整图标大小 */
   height: 20px;
   object-fit: contain;
 }
@@ -391,7 +373,6 @@ const getCategoryCount = (category) => {
 .slide-vertical-enter-from {
   opacity: 0;
   transform: translateY(-50px);
-  /* 从下方进入 */
 }
 
 .slide-vertical-enter-to {
@@ -407,7 +388,6 @@ const getCategoryCount = (category) => {
 .slide-vertical-leave-to {
   opacity: 0;
   transform: translateY(-100px);
-  /* 向上消失 */
 }
 
 .node-list {
@@ -421,9 +401,7 @@ const getCategoryCount = (category) => {
 .node-item {
   display: flex;
   align-items: center;
-  /* 关键：垂直居中序号与内容块 */
   gap: 12px;
-  /* 序号与内容间距 */
   width: 100%;
   box-sizing: border-box;
   padding: 10px 8px;
@@ -432,17 +410,13 @@ const getCategoryCount = (category) => {
   transition: background 0.2s;
 }
 
-/* 序号样式：白字 + 绿色背景，固定大小，垂直居中 */
 .node-index {
   flex: 0 0 25px;
-  /* 固定宽度 */
   height: 25px;
-  /* 固定高度 */
   display: flex;
   align-items: center;
   justify-content: center;
   background: #296a5f;
-  /* 绿色背景（可按你的配色替换） */
   color: #ffffff;
   font-weight: 700;
   border-radius: 12px;
@@ -450,25 +424,20 @@ const getCategoryCount = (category) => {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05) inset;
 }
 
-/* 内容列占满剩余空间 */
 .node-content {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
-  /* 让内部的截断生效 */
 }
 
-/* 保留并加强你的截断样式（支持 -webkit 和 标准 line-clamp 尝试） */
 .node-title {
   font-size: 14px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  /* 非标准，但主流浏览器支持 */
   line-clamp: 2;
-  /* 草案标准，未来可能支持 */
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.4;
@@ -476,7 +445,6 @@ const getCategoryCount = (category) => {
   margin: 0;
 }
 
-/* 作者同样修复截断 */
 .node-author,
 .node-year {
   font-size: 12px;
@@ -486,21 +454,18 @@ const getCategoryCount = (category) => {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
   line-clamp: 1;
-  /* 草案标准，未来可能支持 */
-  /* 作者只显示一行 */
+
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.4;
   max-height: 1.4em;
 }
 
-/* 保留 hover 高亮效果 */
 .node-item:hover {
   background-color: #ececec;
   border-radius: 16px;
 }
 
-/* ========= 辅助工具按钮区域 ========= */
 .sidebar-tools {
   position: absolute;
   top: calc(96%);
@@ -510,7 +475,6 @@ const getCategoryCount = (category) => {
   flex-direction: column;
   gap: 8px;
 
-  /* 动画和按钮保持一致 */
   opacity: 1;
   pointer-events: auto;
   transition: opacity 0.5s ease, left 0.3s ease;
@@ -522,15 +486,12 @@ const getCategoryCount = (category) => {
 
 .sidebar-tools.expanded {
   left: 455px;
-  /* 保持位置和按钮一致 */
   opacity: 1;
   pointer-events: auto;
 }
 
 .sidebar-tools.collapsed {
   left: 15px;
-  /* 保持位置和按钮一致 */
-
 }
 
 
@@ -547,15 +508,13 @@ const getCategoryCount = (category) => {
   margin-top: -10px;
 }
 
-/* 单个工具按钮 */
 .tool-btn {
   width: 28px;
-  /* 🔹比原来40px小一点 */
+
   height: 28px;
   border-radius: 50%;
   background-color: #ffffff;
   border: 1px solid #2a8878;
-  /* 🔹绿色描边 */
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
@@ -563,8 +522,6 @@ const getCategoryCount = (category) => {
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 4px;
-  /* 🔹让内部 img 留一点空间 */
-  /* ✅ 禁止默认点击黑边 */
   outline: none;
   box-shadow: none;
 }
@@ -575,7 +532,7 @@ const getCategoryCount = (category) => {
   transform: scale(1.05);
 }
 
-/* 按钮内部的图片 */
+
 .tool-btn img {
   width: 100%;
   height: 100%;
@@ -608,7 +565,6 @@ const getCategoryCount = (category) => {
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   margin: 2px 6px 2px 0;
-  /* 上右下左：上下2px，右边6px，左边0 */
   vertical-align: middle;
 }
 

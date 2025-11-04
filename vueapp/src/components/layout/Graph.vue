@@ -17,8 +17,9 @@ const props = defineProps({
   sparkMode: Boolean
 });
 
-const activeCategories = inject('activeCategories'); // Set<string>
-const getCategoryColor = inject('getCategoryColor'); // function(category: string) => color
+// Set<string>
+const activeCategories = inject('activeCategories');
+const getCategoryColor = inject('getCategoryColor');
 const debugMode = inject('debugMode')
 
 const updateNodeRings = () => {
@@ -32,27 +33,24 @@ const updateNodeRings = () => {
     const isHovered = d.id === props.hoveredNodeId;
     const isSelected = d.id === props.selectedNodeId;
 
-    // 基础宽度 + 悬停/选中效果
-    let strokeWidth = 10; // 基础
-    if (isSelected) strokeWidth += 3; // 选中时更醒目
-    if (isHovered) strokeWidth += 2;  // 悬停时略加粗
+    /////// 结点选中 ///////
+    let strokeWidth = 10;
+    if (isSelected) strokeWidth += 3;
+    if (isHovered) strokeWidth += 2;
 
-    // ✅ 用 transition 包裹所有边框变化（平滑动画）
     const t = nodeElement.transition().duration(150);
 
     if (activeNodeCategories.length > 0) {
       if (activeNodeCategories.length === 1) {
-        // 单个类别：使用纯色
         const borderColor = getCategoryColor(activeNodeCategories[0]);
         t.attr('stroke', borderColor)
           .attr('stroke-width', strokeWidth)
           .attr('stroke-opacity', 0.8);
       } else {
-        // 多个类别：使用渐变
         const gradientId = `gradient-${d.id}`;
         const defs = svg.select("defs");
 
-        defs.select(`#${gradientId}`).remove(); // 移除旧渐变
+        defs.select(`#${gradientId}`).remove();
 
         const gradient = defs.append("linearGradient")
           .attr("id", gradientId)
@@ -79,7 +77,7 @@ const updateNodeRings = () => {
           .attr('stroke-opacity', 0.8);
       }
     } else {
-      // 没有激活类别，根据悬停/选中状态设置边框
+      // 没有激活类别的情况，保持原先
       if (isHovered || isSelected) {
         t.attr('stroke', isSelected ? 'steelblue' : 'steelblue')
           .attr('stroke-width', isHovered ? 12 : (isSelected ? 12 : 0))
@@ -95,13 +93,13 @@ const updateNodeRings = () => {
 
 watch(() => props.hoveredNodeId, () => {
   if (!g) return;
-  updateNodeRings(); // ✅ 仅重新绘制边框样式
+  updateNodeRings(); // 仅重新绘制边框样式
 });
-// 监听选中节点（点击后保持高亮 + 居中）
-// 监听选中节点（点击后保持高亮 + 居中 + 放大）
+
+// 监听选中动作
 watch(() => props.selectedNodeId, (newId) => {
   if (!g || !svg || !zoom) return;
-  updateNodeRings(); // ✅ 统一控制 strokeWidth
+  updateNodeRings();
   updateHighlight();
 
   if (!newId) {
@@ -109,7 +107,7 @@ watch(() => props.selectedNodeId, (newId) => {
     return;
   }
 
-  // ✅ 居中逻辑保留
+  // 居中逻辑
   const node = simulation?.nodes()?.find(n => n.id === newId);
   if (!node) return;
 
@@ -138,11 +136,11 @@ let simulation = null;
 let svg = null;
 let g = null;
 let zoom = null;
-let nodeRadiusScale = null; // 改：由单一数值改为比例尺
+let nodeRadiusScale = null;
 let currentTransform = d3.zoomIdentity;
 let resizeHandler = null;
 
-// 截断 author
+// author处理（截断
 const truncateAuthor = (author) => {
   if (!author) return "";
   const commaIndex = author.indexOf(",");
@@ -150,7 +148,7 @@ const truncateAuthor = (author) => {
   return author.substring(0, commaIndex);
 };
 
-// 初始化节点位置
+/////////// 初始化节点位置 /////////////
 const initializeNodePositions = (nodes, container, oldNodes = []) => {
   if (!container) return nodes;
   const width = container.clientWidth;
@@ -169,7 +167,8 @@ const initializeNodePositions = (nodes, container, oldNodes = []) => {
     }
   });
 };
-// 初始化图表
+
+////// 初始化图表 ////////
 const initGraph = async () => {
   await nextTick();
   const container = graphContainer.value;
@@ -184,10 +183,8 @@ const initGraph = async () => {
     .attr("height", "100%")
     .style("cursor", "grab");
 
-  // ✅ 定义渐变背景
+  // 渐变背景
   const defs = svg.append("defs");
-
-  // 背景渐变
   const bgGradient = defs.append("linearGradient")
     .attr("id", "bgGradient")
     .attr("x1", "0%")
@@ -197,22 +194,20 @@ const initGraph = async () => {
 
   bgGradient.append("stop")
     .attr("offset", "0%")
-    .attr("stop-color", "#d0d0d0"); // 稍深灰
+    .attr("stop-color", "#d0d0d0");
   bgGradient.append("stop")
     .attr("offset", "50%")
-    .attr("stop-color", "#f8f8f8"); // 中间亮灰
+    .attr("stop-color", "#f8f8f8");
   bgGradient.append("stop")
     .attr("offset", "100%")
-    .attr("stop-color", "#ffffff"); // 纯白
+    .attr("stop-color", "#ffffff");
 
-
-  // ✅ 添加背景矩形（必须在最底层）
   svg.append("rect")
     .attr("width", "100%")
     .attr("height", "100%")
     .attr("fill", "url(#bgGradient)");
 
-  // ✅ 阴影 + 柔光滤镜定义
+  // 阴影和滤镜
   const shadow = defs.append("filter")
     .attr("id", "nodeShadow")
     .attr("x", "-50%")
@@ -224,7 +219,7 @@ const initGraph = async () => {
     .attr("dx", 1)
     .attr("dy", 4)
     .attr("stdDeviation", 6)
-    .attr("flood-color", "rgba(70,130,180,0.9)") // steelblue 阴影
+    .attr("flood-color", "rgba(70,130,180,0.9)")
     .attr("flood-opacity", 0.6);
 
   const edgeGlow = defs.append("filter")
@@ -236,7 +231,7 @@ const initGraph = async () => {
 
   edgeGlow.append("feGaussianBlur")
     .attr("in", "SourceGraphic")
-    .attr("stdDeviation", 4)  // 模糊程度（光晕范围）
+    .attr("stdDeviation", 4)
     .attr("result", "blur");
 
   edgeGlow.append("feMerge")
@@ -245,10 +240,10 @@ const initGraph = async () => {
     .enter()
     .append("feMergeNode")
     .attr("in", d => d);
-  // ✅ 主图层
+  //////// 主图层 ///////////
   g = svg.append("g");
 
-  // ✅ 缩放控制
+  // 缩放控制
   zoom = d3.zoom()
     .scaleExtent([0.2, 4])
     .on("zoom", event => {
@@ -257,10 +252,9 @@ const initGraph = async () => {
     });
 
   svg.call(zoom);
+  // 点击同样可以取消选中样式 
   svg.on("click", (event) => {
-    // 如果点的是背景矩形（即没有点到节点或连线）
     if (event.target.tagName === "rect") {
-      // 调用从父组件传递的 clearInfo 方法
       props.clearInfoMethod?.();
     }
   });
@@ -307,15 +301,12 @@ const applyForces = (nodesWithPosition, linksData, container, radiusScale) => {
       .distance(d => {
         const threshold = props.threshold;
 
-        // 阈值越小，基础距离越大（因为连接更多，需要更分散）
-        const baseDistance = 400 - (threshold * 150); // 400-250px 范围
+        const baseDistance = 400 - (threshold * 150);
 
-        // 根据 weight 调整：weight 越大距离越近
-        const weightFactor = 0.3 + (1 - d.weight) * 4; // 0.3 到 1.0
+        const weightFactor = 0.3 + (1 - d.weight) * 4;
 
         const calculatedDistance = baseDistance * weightFactor;
 
-        // 设置合理的范围限制
         const minDistance = 100;
         const maxDistance = 5000;
 
@@ -331,12 +322,11 @@ const applyForces = (nodesWithPosition, linksData, container, radiusScale) => {
         ? Math.max(...connectedLinks.map(l => l.weight))
         : 0;
 
-      // ✅ 改进：弱连接节点斥力不那么强
       const adjusted = baseStrength * (1 - 0.5 * maxWeight);
       return Math.max(minStrength, adjusted);
     }))
     .force("center", d3.forceCenter(centerX, centerY))
-    // ✅ 新增：轻微中心引力，防止离群点飞太远
+    // 防止离群过远
     .force("gravity", d3.forceRadial(
       Math.min(centerX, centerY) * 0.3,
       centerX,
@@ -345,7 +335,6 @@ const applyForces = (nodesWithPosition, linksData, container, radiusScale) => {
     .force("collision", d3.forceCollide().radius(d => radiusScale(d.relevance) + 10));
 
 };
-
 
 // 更新图表
 const updateGraphData = () => {
@@ -356,7 +345,7 @@ const updateGraphData = () => {
   const oldNodes = simulation ? simulation.nodes() : [];
   const nodesWithPosition = initializeNodePositions(props.nodes, container, oldNodes);
 
-  // 计算相对半径比例尺
+  // 计算相对比例尺
   const relevanceExtent = d3.extent(nodesWithPosition, d => d.relevance || 0.8);
   const minRelevance = relevanceExtent[0] ?? 0.7;
   const maxRelevance = relevanceExtent[1] ?? 0.9;
@@ -368,7 +357,6 @@ const updateGraphData = () => {
     .range([rMin, rMax])
     .clamp(true);
 
-  // ✅ 修复：提取 links 过滤逻辑到单独函数，只执行一次
   const getFilteredLinks = () => {
     const threshold = props.threshold;
     const maxLinksPerNode = 6;
@@ -383,7 +371,7 @@ const updateGraphData = () => {
 
     let limitedLinks = [];
     linkGroups.forEach(group => {
-      group.sort((a, b) => b.weight - a.weight); // ✅ 这里确实是根据 weight 排序
+      group.sort((a, b) => b.weight - a.weight);
       limitedLinks.push(...group.slice(0, maxLinksPerNode));
     });
 
@@ -397,14 +385,13 @@ const updateGraphData = () => {
 
   const linksData = getFilteredLinks();
 
-  // 初次创建或更新 forces
+  // 更新力系统
   if (!simulation) {
     applyForces(nodesWithPosition, linksData, container, nodeRadiusScale);
   } else {
     simulation.stop();
     simulation.nodes(nodesWithPosition);
 
-    // ✅ 修复：确保更新 simulation 中的 links
     const linkForce = simulation.force("link");
     if (linkForce) linkForce.links(linksData);
 
@@ -413,7 +400,7 @@ const updateGraphData = () => {
 
   // --- 绘制 ---
 
-  // 提取年份（确保每个节点都有 year 属性）
+  // 提取年份
   nodesWithPosition.forEach(d => {
     if (d.update_date) {
       const match = d.update_date.match(/^(\d{4})/);
@@ -423,18 +410,14 @@ const updateGraphData = () => {
     }
   });
 
-  // === 颜色比例尺 ===
+  // 颜色比例尺
   const yearExtent = d3.extent(nodesWithPosition, d => d.year || 2020);
   const colorScale = d3.scaleLinear()
     .domain([yearExtent[0] || 2000, yearExtent[1] || 2025])
     .range(["rgb(90, 166, 155)", "rgb(3, 44, 38)"]);
 
-
   const nodeSel = g.selectAll("circle").data(simulation.nodes(), d => d.id);
   nodeSel.exit().remove();
-
-
-
 
   const nodeEnter = nodeSel.enter()
     .append("circle")
@@ -457,12 +440,9 @@ const updateGraphData = () => {
     .on("click", (event, d) => emit("node-click", d));
 
   nodeEnter.merge(nodeSel).call(createDragBehavior(simulation));
-  // ✅ 修复：使用统一的 linksData 进行绘制
+
   const linkSel = g.selectAll("line").data(linksData, d => `${d.source.id}-${d.target.id}`);
   linkSel.exit().remove();
-  // ✅ 创建基于主题色的渐变比例尺
-  // 或者给范围一些缓冲，让渐变更明显
-
 
   const linkColorScale = d3.scaleLinear()
     .domain([0.5, 1])
@@ -486,18 +466,18 @@ const updateGraphData = () => {
     .attr("class", "label")
     .style("pointer-events", "none")
     .each(function (d) {
-      // === 1️⃣ 解析年份 ===
+      // === 解析年份 ===
       const match = d.update_date?.match(/^(\d{4})/);
       const year = match ? match[1] : "N/A";
 
-      // === 2️⃣ 作者截断处理 ===
+      // === 作者截断 ===
       let author = truncateAuthor(d.authors) || "Unknown";
-      const maxLen = 6; // 最多显示6个字符
+      const maxLen = 6;
       if (author.length > maxLen) {
         author = author.substring(0, maxLen) + "…";
       }
 
-      // === 3️⃣ 字体大小 & 布局 ===
+      // === 字体大小 & 布局 ===
       const fontSize = Math.max(12, Math.min(18, nodeRadiusScale(d.relevance) / 3.5));
       const lineHeight = fontSize * 1.3;
       const gLabel = d3.select(this);
@@ -509,7 +489,6 @@ const updateGraphData = () => {
         .attr("font-weight", "bold")
         .attr("font-size", fontSize)
         .attr("y", -lineHeight / 0.8)
-        // ✅ 更明显的黑描边
         .attr("stroke", "white")
         .attr("stroke-width", 1)
         .attr("paint-order", "stroke")
@@ -527,8 +506,6 @@ const updateGraphData = () => {
         .attr("paint-order", "stroke")
         .text(author);
     });
-
-
 
 
   labelEnter.merge(label);
@@ -550,15 +527,15 @@ const updateGraphData = () => {
   });
   updateNodeRings();
   simulation.alpha(3).restart();
-  // 保证 links 在最下层
+  // links 在最下层
   g.selectAll("line").lower();
-  // 保证节点在 links 之上
+  // 节点在 links 之上
   g.selectAll("circle").raise();
   // 标签在最上层
   g.selectAll("g.label").raise();
 };
 
-// ✅ 高亮选中节点及其邻居
+// 高亮选中节点及其邻居
 function updateHighlight() {
   if (!g) return;
 
@@ -571,7 +548,6 @@ function updateHighlight() {
     .attr("stroke", function () { return d3.select(this).attr("data-stroke"); })
     .attr("stroke-width", 3)
     .attr("opacity", 0.8);
-
 
   // --- 重置所有节点 ---
   nodeSel
@@ -597,9 +573,8 @@ function updateHighlight() {
     .attr("stroke-width", d => 1 + 20 * Math.pow((d.weight - 0.7) / 0.3, 3))
     .attr("opacity", 1)
     .attr("filter", d => {
-      // 🔥 根据 weight 调整发光强度
+      // 根据 weight 调整发光强度
       const glowId = `edgeGlow-${Math.round(d.weight * 1000)}`;
-      // 若未定义，则动态创建对应强度的滤镜
       if (svg.select(`#${glowId}`).empty()) {
         const f = svg.select("defs").append("filter")
           .attr("id", glowId)
@@ -609,7 +584,7 @@ function updateHighlight() {
           .attr("height", "200%");
         f.append("feGaussianBlur")
           .attr("in", "SourceGraphic")
-          .attr("stdDeviation", 3 + 5 * d.weight) // weight越高越亮
+          .attr("stdDeviation", 3 + 5 * d.weight)
           .attr("result", "blur");
         const merge = f.append("feMerge");
         merge.append("feMergeNode").attr("in", "blur");
@@ -617,7 +592,6 @@ function updateHighlight() {
       }
       return `url(#${glowId})`;
     });
-
 
   // --- 收集相邻节点 ---
   const neighborIds = new Set([selectedId]);
@@ -634,11 +608,7 @@ function updateHighlight() {
     .attr("filter", d => (neighborIds.has(d.id) ? "url(#nodeGlow)" : "url(#nodeShadow)"));
 }
 
-
-
-
-
-// 智能居中
+// 智能居中函数
 const smartCenterGraph = () => {
   if (!g || !svg || !graphContainer.value) return;
   requestAnimationFrame(() => {
@@ -672,7 +642,6 @@ const smartCenterGraph = () => {
 };
 
 
-
 watch(activeCategories, () => {
   if (debugMode.value)
     console.log('activeCategories 变化了:', Array.from(activeCategories.value));
@@ -702,8 +671,6 @@ watch(() => [props.nodes, props.links], async () => {
 }, { deep: true });
 
 
-
-
 onBeforeUnmount(() => {
   if (resizeHandler) window.removeEventListener("resize", resizeHandler);
   if (simulation) {
@@ -713,7 +680,7 @@ onBeforeUnmount(() => {
 });
 
 watch(() => props.threshold, () => {
-  if (simulation) updateGraphData(); // ✅ 只要更新 links 就会重新绑定
+  if (simulation) updateGraphData();
 });
 
 
@@ -728,11 +695,11 @@ const activateCommunityLayout = () => {
   const centerX = width / 2;
   const centerY = height / 2;
 
-  // === 1️⃣ 获取社区及其数量 ===
+  // === 获取社区及其数量 ===
   const communities = Array.from(new Set(props.nodes.map(n => n.community_id).filter(Boolean)));
   const numCommunities = Math.max(1, communities.length);
 
-  // === 2️⃣ 社区在圆周上分布 ===
+  // === 社区在圆周上分布 ===
   const layoutRadius = Math.min(width, height) * 0.4;
   const angleStep = (2 * Math.PI) / numCommunities;
   const communityCenters = new Map();
@@ -744,7 +711,7 @@ const activateCommunityLayout = () => {
     });
   });
 
-  // === 3️⃣ 替换力系统 ===
+  // === 替换力系统 ===
   simulation
     .force("center", null)
     .force("gravity", null)
@@ -762,7 +729,7 @@ const activateCommunityLayout = () => {
       .strength(0.01)
     );
 
-  // === 4️⃣ 社区间排斥 ===
+  // === 社区间排斥 ===
   const communityRepelForce = () => {
     const nodes = simulation.nodes();
     const K = 1000;
@@ -785,7 +752,7 @@ const activateCommunityLayout = () => {
   };
   simulation.force("communityRepel", communityRepelForce);
 
-  // === 5️⃣ 调整链接强度（同社区更紧） ===
+  // === 调整链接强度（同社区更紧） ===
   const linkForce = simulation.force("link");
   if (linkForce) {
     linkForce.strength(d =>
@@ -800,7 +767,6 @@ const activateCommunityLayout = () => {
 
 
 // 恢复默认布局
-// 恢复默认布局 - 修复版
 const resetToDefaultLayout = () => {
   if (debugMode.value)
     console.log('🔄 恢复默认布局');
@@ -812,16 +778,15 @@ const resetToDefaultLayout = () => {
   const centerX = width / 2;
   const centerY = height / 2;
 
-  // === 1️⃣ 完全恢复初始力系统参数 ===
   simulation
     .force("center", d3.forceCenter(centerX, centerY))
     .force("gravity", d3.forceRadial(
       Math.min(centerX, centerY) * 0.3,
       centerX,
       centerY
-    ).strength(0.005)) // ✅ 与初始布局完全一致
+    ).strength(0.005))
     .force("charge", d3.forceManyBody().strength(d => {
-      // ✅ 恢复初始的斥力计算逻辑
+
       const connectedLinks = props.links.filter(
         l => l.source.id === d.id || l.target.id === d.id
       );
@@ -835,20 +800,19 @@ const resetToDefaultLayout = () => {
       return Math.max(minStrength, adjusted);
     }))
     .force("collision", d3.forceCollide()
-      .radius(d => (nodeRadiusScale ? nodeRadiusScale(d.relevance) : 40) + 10) // ✅ 与初始一致
-      .strength(1) // ✅ 恢复默认碰撞强度
+      .radius(d => (nodeRadiusScale ? nodeRadiusScale(d.relevance) : 40) + 10)
+      .strength(1)
     )
     .force("communityX", null)
     .force("communityY", null)
     .force("communityRepel", null);
 
-  // === 2️⃣ 恢复链接力 ===
+  // === 恢复链接力 ===
   const linkForce = simulation.force("link");
   if (linkForce) {
     linkForce
       .id(d => d.id)
       .distance(d => {
-        // ✅ 恢复初始距离计算逻辑
         const threshold = props.threshold;
         const baseDistance = 400 - (threshold * 150);
         const weightFactor = 0.3 + (1 - d.weight) * 4;
@@ -857,31 +821,27 @@ const resetToDefaultLayout = () => {
         const maxDistance = 5000;
         return Math.max(minDistance, Math.min(calculatedDistance, maxDistance));
       })
-      .strength(d => 0.1 + 0.01 * d.weight); // ✅ 恢复初始强度
+      .strength(d => 0.1 + 0.01 * d.weight);
   }
 
-  // === 3️⃣ 关键：恢复初始的 alpha 参数 ===
+  // === 恢复初始的 alpha 参数 ===
   simulation
-    .alpha(2)                    // ✅ 与初始激活能量一致
-    .alphaDecay(0.00002)              // ✅ 恢复较慢的衰减（初始布局使用 0.02）
-
-
+    .alpha(2)
+    .alphaDecay(0.00002)
   simulation.restart();
 
-  // === 4️⃣ 重新居中 ===
+  // === 重新居中 ===
   setTimeout(() => smartCenterGraph(), 800);
 };
 
 
-
-
 watch(() => props.sparkMode, (newVal) => {
   if (debugMode.value)
-    console.log('📊 Graph.vue - Spark 模式变化:', newVal)
+    console.log('Graph.vue - Spark 模式变化:', newVal)
   if (newVal) {
-    activateCommunityLayout() // 执行社区布局函数
+    activateCommunityLayout()
   } else {
-    resetToDefaultLayout() // 恢复默认布局
+    resetToDefaultLayout()
   }
 })
 
