@@ -207,7 +207,7 @@ const fetchNodes = async () => {
     await new Promise(resolve => setTimeout(resolve, 500));
     if (DEBUG_MODE) {
       let debug_url;
-      if (query.value === 'test1') {
+      if (query.value === 'Supersolidity') {
         debug_url = '/files/test_new_community1.json';
       } else {
         debug_url = '/files/test_new_community2.json';

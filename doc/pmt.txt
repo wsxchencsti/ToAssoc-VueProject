@@ -1,0 +1,137 @@
+wget https://mirrors.huaweicloud.com/python/3.12.10/Python-3.12.10.tgz
+
+./configure --enable-optimizations
+
+make altinstall
+
+/usr/local/bin/python3.12 --version
+
+ln -sf /usr/local/bin/python3.12 /usr/bin/python3
+
+python3 --version
+python3 -m pip install setuptools wheel
+yum groupinstall "Development Tools" -y
+yum install python3-devel openblas-devel -y
+python3 -m pip install numpy pandas pyarrow faiss-cpu scikit-learn tqdm
+
+# 参数
+python to_faiss1021.py \
+  --parquet_dir parquet_parts_whole \
+  --output_edges knn_edges.parquet \
+  --k_neighbors 30 \
+  --similarity_threshold 0.6
+
+
+python to_faiss1021.py --parquet_dir parquet_parts_whole --output_edges knn_edges_09.parquet --k_neighbors 30 --similarity_threshold 0.9 --index_type ivf --nlist 2048 --batch_size 100000
+
+
+
++++++++++++++++++++++++++spark+++++++++++++++++++++++
+测试
+spark-shell --master yarn --deploy-mode client << 'EOF'
+:load /root/louvain-project/src/main/scala/LouvainAlgorithm.scala
+println("LouvainAlgorithm.scala loaded successfully!")
+EOF
+
+
+bash
+spark-shell --master yarn --deploy-mode client   --conf spark.executor.memory=16g   --conf spark.executor.memoryOverhead=4g   --conf spark.driver.memory=8g   --conf spark.executor.instances=4   --conf spark.executor.cores=4
+
+逐行执行
+scala
+// 1. 加载算法
+:load /root/louvain-project/src/main/scala/LouvainAlgorithm.scala
+
+// 2. 运行测试代码
+spark.sparkContext.setLogLevel("WARN")
+
+println("=== Starting Louvain Test ===")
+
+// 读取数据
+val edgesDF = spark.read.parquet("/user/root/louvain_test/edges_09/knn_edges_09.parquet")
+println(s"Edges: ${edgesDF.count()}")
+
+// 构建图
+val edgesRDD = edgesDF.rdd.map { row =>
+  Edge(row.getAs[Long]("source"), row.getAs[Long]("target"), row.getAs[Double]("weight"))
+}
+val verticesRDD = edgesRDD.flatMap(edge => Seq((edge.srcId, None), (edge.dstId, None))).distinct()
+val graph = Graph(verticesRDD, edgesRDD)
+println(s"Graph: ${graph.vertices.count()} vertices, ${graph.edges.count()} edges")
+
+// 配置和运行Louvain
+val config = LouvainConfig(maxIter = 3, internalIter = 2, tol = 0.01, alpha = 1.0, dateParam = "20241021")
+println("Running Louvain...")
+val communities = Louvain.execute(spark, graph, config)
+
+// 显示结果
+println("Sample results:")
+communities.take(10).foreach(println)
+println(s"Total: ${communities.count()}")
+
+// 计算实际社区数量
+val distinctCommunities = communities.map(row => row.getString(1)).distinct().count()
+println(s"实际社区数量: $distinctCommunities")
+
+// 查看社区大小分布
+val communitySizeDistribution = communities.map(row => (row.getString(1), 1))
+  .reduceByKey(_ + _)
+  .map(_._2)  // 只取社区大小
+  .map(size => (size, 1))
+  .reduceByKey(_ + _)
+  .sortByKey()
+
+println("社区大小分布:")
+communitySizeDistribution.collect().foreach { case (size, count) =>
+  println(s"大小为 $size 的社区有 $count 个")
+}
+
+println("=== 要保存的社区分配样本 ===")
+communities.take(20).foreach { row =>
+  println(s"论文 ${row.getLong(0)} → 社区 ${row.getString(1)}")
+}
+
+// 查看数据统计
+println(s"\n=== 数据统计 ===")
+println(s"总记录数: ${communities.count()}")
+println(s"唯一社区数: ${communities.map(_.getString(1)).distinct().count()}")
+++保存方法++
+// 导入必要的隐式转换
+import spark.implicits._
+
+// 1. 保存社区分配结果
+println("正在保存社区分配结果...")
+communities.toDF("paper_id", "community_id")
+  .write
+  .mode("overwrite")
+  .parquet("/user/root/louvain_test/community_results_09v1/")
+
+// 2. 保存社区统计信息
+println("正在保存社区统计...")
+val communityStatsDF = communities.map(row => (row.getString(1), 1))
+  .reduceByKey(_ + _)
+  .map{case (commId, size) => (commId, size)}
+  .toDF("community_id", "community_size")
+
+communityStatsDF.write
+  .mode("overwrite")
+  .parquet("/user/root/louvain_test/community_stats_09v1/")
+
+// 3. 验证保存结果
+println("验证保存结果...")
+val savedCommunities = spark.read.parquet("/user/root/louvain_test/community_results_09v1/")
+println(s"保存的社区分配记录: ${savedCommunities.count()}")
+
+val savedStats = spark.read.parquet("/user/root/louvain_test/community_stats_09v1/")
+println(s"保存的社区统计记录: ${savedStats.count()}")
+
+println("=== 所有结果保存完成 ===")
+println("路径:")
+println("- 社区分配: /user/root/louvain_test/community_results_09v1/")
+println("- 社区统计: /user/root/louvain_test/community_stats_09v1/")
+
+spark.stop()
+
++++ hdfs+++
+hdfs dfs -ls
+hdfs dfs -get /user/root/louvain_test/community_results_09v1/ /root/

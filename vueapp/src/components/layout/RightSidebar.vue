@@ -442,7 +442,7 @@ function drawCommunityGraph() {
       id: c.id,
       name: '',
       value: c.count,
-      symbolSize: Math.pow(c.count, 1.1) * 2 + 10,
+      symbolSize: Math.pow(c.count, 1.1) * 1.1 + 10,
       itemStyle: { color: 'orange' },
       label: { show: false }
     }))

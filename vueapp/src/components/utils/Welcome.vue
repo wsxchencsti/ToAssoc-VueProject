@@ -8,6 +8,7 @@
     <div class="intro-info">
       <h1>Associate Your Query</h1>
       <p>Explore research proximity beyond existing links.</p>
+      <h6>基于任意查询的 arXiv 学术网络与论文图谱可视化系统</h6>
     </div>
     <!-- ✅ 居中搜索框 -->
     <div class="search-overlay">
@@ -338,6 +339,12 @@ function onResize() {
   margin-top: 0.5rem;
   font-weight: 600;
   color: #052c25;
+}
+.intro-info h6 {
+  font-size: 1.2rem;
+  font-family: '隶书';
+  margin-top: -1.7rem;
+  color: #919191;
 }
 
 :deep(.search-box) {
