@@ -9,20 +9,28 @@
         <!-- <img src="/icons/header/openinnew.svg" alt="open" class="open-icon" /> -->
         View on Github
       </a>
-      <button @click="$emit('navigate', 'about')">Display</button>
+      <button @click="showPPT">Display</button>
+
       <img src="/icons/header/account.svg" alt="Account" class="account-icon" title="卖掉了" />
     </nav>
+    <PPTPlayer ref="pptRef" />
   </header>
 </template>
 
 <script setup>
 import SearchBox from '../utils/SearchBox.vue';
+import PPTPlayer from '../utils/PPTPlayer.vue';
+import { ref } from 'vue';
 
 defineProps({
   loading: Boolean, showSearch: Boolean
 });
 
 defineEmits(['search']);
+const pptRef = ref(null);
+function showPPT() {
+  pptRef.value.open(); // 调用子组件的 open() 方法
+}
 </script>
 
 <style scoped>
